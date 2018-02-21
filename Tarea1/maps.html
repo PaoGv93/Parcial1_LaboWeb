@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <meta name="viewport" content="width=device-width" />
+
+  <style type="text/css">
+    html {
+      height: 100%
+    }
+
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0
+    }
+
+    #map_canvas {
+      height: 100%
+    }
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?&sensor=true">
+  </script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <script type="text/javascript">
+    var message2 = "";
+    var color = "A93226";
+    var icon = "";
+
+    function changeColor() {
+      var opt = document.getElementById('colorPicker').value;
+      console.log("Cambiando color");
+      switch (parseInt(opt)) {
+        case 1:
+          color = "A93226";
+          break;
+        case 2:
+          color = "2E8001";
+          break;
+        case 3:
+          color = "2ECC71";
+          break;
+        case 4:
+          color = "F4D03F";
+          break;
+        case 5:
+          color = "FDFEFE";
+          break;
+        default:
+          break;
+      }
+      drawMarker();
+    }
+
+    function changeMessage() {
+      message2 = document.getElementById('msg').value;
+      drawMarker();
+    }
+
+    function changeIcon() {
+      icon = document.getElementById('icn').value;
+      drawMarker();
+    }
+
+    function drawMarker() {
+
+      var infowindow = new google.maps.InfoWindow();
+      var marker, i;
+      var nombre = sessionStorage.nombreCliente;
+      var message = message2; //nombre del pin
+
+      var pinColor = color; //color del pin
+      var charMarker = icon; //simbolo que sale dentro del pin
+
+      //var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+      var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=" + charMarker + "|" + pinColor,
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34));
+
+      marker = new google.maps.Marker({
+        position: new google.maps.LatLng(lat, lng),
+        icon: pinImage,
+        title: '' + message,
+        map: map
+      });
+      google.maps.address(address);
+
+
+      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        return function() {
+          infowindow.setContent("Paola");
+          infowindow.open(map, marker);
+        }
+      })(marker, i));
+
+    }
+
+
+
+    var mapOptions = null;
+    var map = null;
+
+    var infowindow;
+    (function() {
+      google.maps.Map.prototype.markers = new Array();
+      google.maps.Map.prototype.getMarkers = function() {
+        return this.markers
+      };
+
+      google.maps.Map.prototype.clearMarkers = function() {
+        for (var i = 0; i < this.markers.length; i++) {
+          this.markers[i].setMap(null);
+        }
+        this.markers = new Array();
+      };
+
+      google.maps.Marker.prototype._setMap = google.maps.Marker.prototype.setMap;
+      google.maps.Marker.prototype.setMap = function(map) {
+        if (map) {
+          map.markers[map.markers.length] = this;
+        }
+        this._setMap(map);
+      }
+    })();
+
+
+    //Creacion del mapa
+    function initMap() {
+
+      lat = 19.01826447750003;
+      lng = -98.24133396148682;
+
+
+      mapOptions = {
+        center: new google.maps.LatLng(lat, lng),
+        zoom: 14,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      };
+
+      map = new google.maps.Map(document.getElementById("map_canvas"),
+        mapOptions);
+      //click para poder mover el mapa
+      google.maps.event.addListener(map, 'click', function(event) {
+
+        lat = event.latLng.lat();
+        lng = event.latLng.lng();
+
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+
+        map.clearMarkers();
+        drawMarker();
+      });
+
+      drawMarker();
+
+    }
+
+
+
+    function obtenerDireccion() {
+      alert("obteniendo direccion ...");
+
+      var geocoder = new google.maps.Geocoder;
+
+      var mylat = document.getElementById('lat').value;
+      var mylng = document.getElementById('lng').value;
+
+      var latlng = {
+        lat: parseFloat(mylat),
+        lng: parseFloat(mylng)
+      };
+      geocoder.geocode({
+        'address': myaddress
+      }, function(results, status) {});
+
+      geocoder.geocode({
+        'location': latlng
+      }, function(results, status) {
+        if (status === 'OK') {
+          if (results[0]) {
+            //window.alert(results[0].formatted_address);
+            window.alert(JSON.stringify(results[0]));
+
+          } else {
+            window.alert('No results found');
+          }
+        } else {
+          window.alert('Geocoder failed due to: ' + status);
+        }
+      });
+    }
+
+
+    function obtenerClima() {
+      alert("obteniendo clima ...");
+
+      var lat = 19.0433;
+      var lng = -98.2019;
+      var apiKey = "781f8d6f2ba165d4c4b683c9a3eae895";
+      //funcion jquery, le pasas como parametro url
+      $.getJSON("http://api.openweathermap.org/data/2.5/weather?lat=" +
+        lat + "&lon=" + lng + "&appid=" + apiKey,
+        function(data) {
+          //alert(JSON.stringify(data)); //parsea la informacion obtenida y la muestra
+          var tem = JSON.stringify(data.main.temp);
+          document.getElementById("tempDisplay").value = tem-273.15;
+          var hum = JSON.stringify(data.main.humidity);
+          document.getElementById("humDisplay").value = hum;
+          var vient = JSON.stringify(data.wind.speed);
+          document.getElementById("vientoDisplay").value = vient;
+
+        })
+    }
+
+  </script>
+
+  <style type="text/css">
+    .colorYellow {
+      color: yellow;
+    }
+
+    .colorRed {
+      color: red;
+    }
+
+    .colorBlue {
+      color: blue;
+    }
+
+    .colorGreen {
+      color: green;
+    }
+  </style>
+
+
+
+</head>
+
+<body onload="initMap()">
+
+  <h1 class='colorBlue'><b>Google Maps</b></h1><br><br>
+
+
+<table class="table table-striped table-bordered">
+<tr>
+  <td>
+
+    LAT:
+    <input name="fecha" id="lat" type="text" size="10" /> LNG:
+    <input name="fecha" id="lng" type="text" size="10" />
+
+    <input type="button" value="Obtener Direccion" onclick="obtenerDireccion()" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Message:
+    <input name="message" id="msg" type="text" size="15" />
+    <input type="button" value="Poner mensaje" onclick="changeMessage()" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Icono:
+    <input name="icono" id="icn" type="text" size="1" />
+    <input type="button" value="Poner icono" onclick="changeIcon()" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ColorPin:
+    <select id="colorPicker" onchange="changeColor()">
+          <option value="1">Rojo</option>
+          <option value="2">Azul</option>
+          <option value="3">Verde</option>
+          <option value="4">Amarillo</option>
+          <option value="5">Blanco</option>
+    </select>
+
+    <br><br>
+    <input type="button" value="Obtener Clima" onclick="obtenerClima()" /> &nbsp;temperatura:
+    <input name="clima" id="tempDisplay" type="text" size="10" /> &nbsp;Humedad:
+    <input name="clima" id="humDisplay" type="text" size="10" /> &nbsp;Velocidad viento:
+    <input name="clima" id="vientoDisplay" type="text" size="10" />
+  </td>
+</tr>
+</table>
+
+
+  <div id="map_canvas" style="width: 100%; height: 90%; float: left; border: 1px solid black;">
+
+  </div>
+
+
+</body>
+
+</html>

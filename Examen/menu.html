@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Shopping Car</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <style type="text/css">
+    html {
+      height: 100%
+    }
+
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0
+    }
+
+    #map_canvas {
+      height: 100%
+    }
+
+    .button{
+      background-color: #ff3333;
+    }
+
+    .button2{
+      background-color: #b3e0ff;
+    }
+
+    .tab
+    {
+      margin-left: 40px;
+    }
+
+    .colorYellow {
+      color: yellow;
+    }
+
+    .colorRed {
+      color: red;
+    }
+
+    .colorBlue {
+      color: blue;
+    }
+
+    .colorGreen {
+      color: green;
+    }
+  </style>
+
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?&sensor=true">
+  </script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <script type="text/javascript">
+    var message2 = "";
+    var color = "A93226";
+    var icon = "";
+
+    function changeColor() {
+      var opt = document.getElementById('colorPicker').value;
+      console.log("Cambiando color");
+      switch (parseInt(opt)) {
+        case 1:
+          color = "A93226";
+          break;
+        case 2:
+          color = "2E8001";
+          break;
+        case 3:
+          color = "2ECC71";
+          break;
+        case 4:
+          color = "F4D03F";
+          break;
+        case 5:
+          color = "FDFEFE";
+          break;
+        default:
+          break;
+      }
+      drawMarker();
+    }
+
+    function changeMessage() {
+      message2 = document.getElementById('msg').value;
+      drawMarker();
+    }
+
+    function changeIcon() {
+      icon = document.getElementById('icn').value;
+      drawMarker();
+    }
+
+    function drawMarker() {
+
+      var infowindow = new google.maps.InfoWindow();
+      var marker, i;
+      var nombre = sessionStorage.nombreCliente;
+      var message = message2; //nombre del pin
+
+      var pinColor = color; //color del pin
+      var charMarker = icon; //simbolo que sale dentro del pin
+
+      //var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+      var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=" + charMarker + "|" + pinColor,
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34));
+
+      marker = new google.maps.Marker({
+        position: new google.maps.LatLng(lat, lng),
+        icon: pinImage,
+        title: '' + message,
+        map: map
+      });
+      google.maps.address(address);
+
+
+      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        return function() {
+          infowindow.setContent("Paola");
+          infowindow.open(map, marker);
+        }
+      })(marker, i));
+
+    }
+
+
+    var mapOptions = null;
+    var map = null;
+
+    var infowindow;
+    (function() {
+      google.maps.Map.prototype.markers = new Array();
+      google.maps.Map.prototype.getMarkers = function() {
+        return this.markers
+      };
+
+      google.maps.Map.prototype.clearMarkers = function() {
+        for (var i = 0; i < this.markers.length; i++) {
+          this.markers[i].setMap(null);
+        }
+        this.markers = new Array();
+      };
+
+      google.maps.Marker.prototype._setMap = google.maps.Marker.prototype.setMap;
+      google.maps.Marker.prototype.setMap = function(map) {
+        if (map) {
+          map.markers[map.markers.length] = this;
+        }
+        this._setMap(map);
+      }
+    })();
+
+
+    //Creacion del mapa
+    function initMap() {
+
+      lat = 19.01826447750003;
+      lng = -98.24133396148682;
+
+
+      mapOptions = {
+        center: new google.maps.LatLng(lat, lng),
+        zoom: 14,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      };
+
+      map = new google.maps.Map(document.getElementById("map_canvas"),
+        mapOptions);
+      //click para poder mover el mapa
+      google.maps.event.addListener(map, 'click', function(event) {
+
+        lat = event.latLng.lat();
+        lng = event.latLng.lng();
+
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+
+        map.clearMarkers();
+        drawMarker();
+      });
+
+      drawMarker();
+
+    }
+
+
+
+    function obtenerDireccion() {
+      alert("obteniendo direccion ...");
+
+      var geocoder = new google.maps.Geocoder;
+
+      var mylat = document.getElementById('lat').value;
+      var mylng = document.getElementById('lng').value;
+
+      var latlng = {
+        lat: parseFloat(mylat),
+        lng: parseFloat(mylng)
+      };
+      geocoder.geocode({
+        'address': myaddress
+      }, function(results, status) {});
+
+      geocoder.geocode({
+        'location': latlng
+      }, function(results, status) {
+        if (status === 'OK') {
+          if (results[0]) {
+            window.alert(JSON.stringify(results[0]));
+
+          } else {
+            window.alert('No results found');
+          }
+        } else {
+          window.alert('Geocoder failed due to: ' + status);
+        }
+      });
+    }
+
+
+    function obtenerClima() {
+      alert("obteniendo clima ...");
+
+      var lat = 19.0433;
+      var lng = -98.2019;
+      var apiKey = "781f8d6f2ba165d4c4b683c9a3eae895";
+      //funcion jquery, le pasas como parametro url
+      $.getJSON("http://api.openweathermap.org/data/2.5/weather?lat=" +
+        lat + "&lon=" + lng + "&appid=" + apiKey,
+        function(data) {
+          var tem = JSON.stringify(data.main.temp);
+          document.getElementById("tempDisplay").value = tem - 273.15;
+          var hum = JSON.stringify(data.main.humidity);
+          document.getElementById("humDisplay").value = hum;
+          var vient = JSON.stringify(data.wind.speed);
+          document.getElementById("vientoDisplay").value = vient;
+
+        })
+    }
+  </script>
+
+
+  <script>
+    function showpage(idpage) {
+
+      if (idpage == 0) {
+        $("#maps").show();
+        $("#Tienda").hide();
+        $("#Youtube").hide();
+      }
+      if (idpage == 1) {
+        $("#Tienda").show();
+        $("#maps").hide();
+        $("#Youtube").hide();
+      }
+      if (idpage == 2) {
+        $("#Youtube").show();
+        $("#Tienda").hide();
+        $("#maps").hide();
+      }
+    }
+  </script>
+
+  <script>
+    var myDataProductos;
+    var path = "";
+
+    function getDataProductos() {
+
+      var my_producto = $("#id_productos").val();
+
+      myDataProductos.forEach(function(tweet) {
+        if (tweet.id == my_producto) {
+
+          $('#Precio').val(tweet.price);
+
+
+        }
+
+      });
+
+
+    }
+
+
+    function getProducts() {
+
+      var listProducts = []
+
+      var myProduct1 = new ShoppingCarProduct();
+      myProduct1.id = "001";
+      myProduct1.name = "Laptop Dell";
+      myProduct1.price = "12000";
+
+      var myProduct2 = new ShoppingCarProduct();
+      myProduct2.id = "002";
+      myProduct2.name = "Xbox One S";
+      myProduct2.price = "9500";
+
+      var myProduct3 = new ShoppingCarProduct();
+      myProduct3.id = "003";
+      myProduct3.name = "RaspBerry Pi 3";
+      myProduct3.price = "1250";
+
+      var myProduct4 = new ShoppingCarProduct();
+      myProduct4.id = "004";
+      myProduct4.name = "iPhone X";
+      myProduct4.price = "23000";
+
+      var myProduct5 = new ShoppingCarProduct();
+      myProduct5.id = "005";
+      myProduct5.name = "Homepod";
+      myProduct5.price = "30500";
+
+      var myProduct6 = new ShoppingCarProduct();
+      myProduct6.id = "006";
+      myProduct6.name = "Beats Solo";
+      myProduct6.price = "12000";
+
+      var myProduct7 = new ShoppingCarProduct();
+      myProduct7.id = "007";
+      myProduct7.name = "MacBook Pro";
+      myProduct7.price = "40399";
+
+      listProducts.push(myProduct1);
+      listProducts.push(myProduct2);
+      listProducts.push(myProduct3);
+      listProducts.push(myProduct4);
+      listProducts.push(myProduct5);
+      listProducts.push(myProduct6);
+      listProducts.push(myProduct7);
+
+
+      try {
+        tweets = JSON.stringify(listProducts);
+
+
+        tweets = JSON.parse(tweets);
+        myDataProductos = tweets;
+
+        tweets.forEach(function(tweet) {
+          $('#id_productos').append($("<option></option>").attr("value",
+            tweet.id).text(tweet.name));
+
+        });
+
+
+
+      } catch (e) {
+        alert("error : " + e);
+      }
+    }
+
+
+    // <!-- Shopping Car -->
+
+    var currentUserShoppingCart;
+    var i;
+
+
+    Storage.prototype.setObject = function(key, value) {
+      this.setItem(key, JSON.stringify(value));
+    }
+
+    Storage.prototype.getObject = function(key) {
+      return this.getItem(key) && JSON.parse(this.getItem(key));
+    }
+
+
+    function HeaderShoppingCar() {
+      this.idMov = 0;
+      this.idUser = 0;
+      this.idCliente = 0;
+      this.nombreCliente = '';
+      this.tipoMov = 0;
+
+      this.strSerie = '';
+      this.strFolio = '';
+
+      this.strConcepto = '';
+      this.strFormaPago = '';
+      this.decSubTotal = 0;
+
+      this.decDescuento = 0;
+      this.decIva = 0;
+      this.decTotal = 0;
+
+    }
+
+    function ShoppingCarItem() {
+      this.Par = i;
+      this.ProductID = 0;
+
+      this.ProductName = '';
+      this.Precio = 0;
+      this.Cantidad = 0;
+
+      this.Importe = 0;
+      this.PorcDesc1 = 0;
+      this.PorcDesc2 = 0;
+      this.PorcDesc3 = 0;
+      this.Desc1 = 0;
+      this.Desc2 = 0;
+      this.Desc3 = 0;
+      this.ImporteNeto = 0;
+
+    }
+
+
+    function ShoppingCarProduct() {
+      this.id = 0;
+      this.name = '';
+      this.price = 0;
+      this.url = '';
+      this.desc = 50;
+    }
+
+
+    function initialize() {
+      currentUserShoppingCart = new Array();
+      i = 0;
+      getProducts();
+    }
+
+
+    function addCar() {
+
+      try {
+
+        var cantidad = document.getElementById("Cantidad").value;
+
+        if (cantidad == "") throw "TECLEAR CANTIDAD !";
+        if (isNaN(cantidad)) throw "SOLO NUMEROS";
+        if (cantidad < 1) throw "CANT DEBE SER MAYOR DE 0";
+
+        var item = new ShoppingCarItem();
+        item.Par = i + 1;
+        item.ProductID = $("#id_productos").val();
+
+        item.ProductName = $("#id_productos :selected").text().toUpperCase();
+
+        item.Precio = parseFloat(document.getElementById("Precio").value);
+        item.Cantidad = cantidad;
+        var importe = 0;
+
+        importe = item.Precio * item.Cantidad;
+
+        item.Importe = Math.round(importe * 100) / 100;
+
+        var exist = 0;
+        for (var c = currentUserShoppingCart.length; c--;) {
+          var it = currentUserShoppingCart[c];
+
+
+          if (it.ProductID == item.ProductID) {
+            var Cantidad = 0;
+            Cantidad = parseFloat(currentUserShoppingCart[c].Cantidad);
+            Cantidad += parseFloat(item.Cantidad);
+            currentUserShoppingCart[c].Cantidad = Cantidad;
+
+            var importe = 0;
+
+            importe = item.Precio * Cantidad;
+
+            currentUserShoppingCart[c].Importe = Math.round(importe * 100) / 100;
+
+            exist = 1;
+          }
+
+
+        }
+
+        if (exist == 0) {
+          currentUserShoppingCart[i] = item;
+          i++;
+        }
+
+        sessionStorage.setObject('UserShoppingCart', currentUserShoppingCart);
+        //alert("show");
+        showScar();
+        document.getElementById("Precio").innerHTML = '0';
+        document.getElementById('id_productos').focus();
+      } catch (err) {
+        var msgError = "Ocurrio un error en la página.\n\n";
+        msgError += "Descripción: " + err + "\n\n";
+        msgError += "Click OK para continuar.\n\n";
+
+        document.getElementById('Cantidad').value = '';
+        document.getElementById('Cantidad').focus();
+        alert(msgError);
+
+      }
+    }
+
+
+
+    function showScar() {
+      var tableCirs = document.getElementById('tableProducts');
+
+      for (var c = tableCirs.rows.length - 1; c > 0; c--) {
+        tableCirs.deleteRow(c);
+      }
+
+      var userShoppingCart = sessionStorage.getObject('UserShoppingCart');
+
+      if (!userShoppingCart) {
+        $('car').innerHTML = '<br />UserShoppingCart does NOT exist in sessionStorage.';
+        return;
+      }
+
+
+      var totalUni = 0;
+      var totImporte = 0;
+
+      userShoppingCart.forEach(function(tweet) {
+
+        var rowCir = tableCirs.insertRow(-1);
+
+        var rowCount = tableCirs.rows.length - 1;
+
+        var cellCantidad = rowCir.insertCell(0);
+        var cellProducto = rowCir.insertCell(1);
+        var cellPrecio = rowCir.insertCell(2);
+
+        var cellImporte = rowCir.insertCell(3);
+
+        var cellImagen = rowCir.insertCell(4);
+        var cellDescuento = rowCir.insertCell(5);
+        var cellBorrar = rowCir.insertCell(6);
+        getPath(parseInt(tweet.ProductID));
+
+        var url = "<a href=\"javascript: void();\" onclick=\"deleteItem(" + tweet.ProductID + ")\">Borrar</a>";
+        var urlImagen = "<img src='" + path + "' style='width: 50px; height: 50px;' alt=\"\">";
+        cellCantidad.innerHTML = tweet.Cantidad;
+        cellProducto.innerHTML = tweet.ProductName;
+        cellPrecio.innerHTML = tweet.Precio;
+
+        cellImporte.innerHTML = tweet.Importe;
+        cellImagen.innerHTML = urlImagen;
+        cellDescuento.innerHTML = "50%";
+
+        cellBorrar.innerHTML = url;
+
+        totalUni += parseFloat(tweet.Cantidad);
+
+        totImporte += tweet.Importe;
+
+      });
+
+      document.getElementById('totalUnidades').innerHTML = '<b>' + parseFloat(totalUni) + '</b>';
+
+      document.getElementById('totalImporte').innerHTML = '<b>' + totImporte + '</b>';
+
+    }
+
+    function getPath(id) {
+      switch (id) {
+        case 1:
+          path = "image/dell.jpg";
+          break;
+        case 2:
+          path = "image/xbox.jpg";
+          break;
+        case 3:
+          path = "image/raspberry.jpg";
+          break;
+        case 4:
+          path = "image/iphone.jpg";
+          break;
+        case 5:
+          path = "image/homepod.jpg";
+          break;
+        case 6:
+          path = "image/beats.jpg";
+          break;
+        case 7:
+          path = "image/mac.png";
+          break;
+        default:
+      }
+    }
+
+    function deleteItem(item) {
+      for (var c = currentUserShoppingCart.length; c--;) {
+        var it = currentUserShoppingCart[c];
+
+
+        if (it.ProductID == item) {
+          currentUserShoppingCart.splice(c, 1);
+          i--;
+        }
+      }
+      sessionStorage.setObject('UserShoppingCart', currentUserShoppingCart);
+      showScar();
+    }
+
+    function clearSessionStorage() {
+      sessionStorage.clear();
+    }
+
+  </script>
+
+</head>
+
+<body onload="initMap()">
+
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <b><a class="navbar-brand" href="#">Proyecto</a></b>
+      </div>
+      <ul class="nav navbar-nav">
+          <li><a href="#" onclick="showpage(0)">Maps</a></li>
+          <li><a href="#" onclick="showpage(1)">Tienda</a></li>
+          <li><a href="#" onclick="showpage(2)">Youtube</a></li>
+      </ul>
+    </div>
+  </nav>
+
+
+  <!-- MAPA-------------------------------------------------------->
+  <div class="container" id="maps">
+
+    <h1 class='colorBlue'><b>Google Maps</b></h1><br>
+
+
+    <table class="table table-striped table-bordered">
+      <tr>
+        <td>
+
+          LAT:
+          <input name="fecha" id="lat" type="text" size="10" /> LNG:
+          <input name="fecha" id="lng" type="text" size="10" />
+
+          <input type="button" value="Obtener Direccion" onclick="obtenerDireccion()" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Message:
+          <input name="message" id="msg" type="text" size="15" />
+          <input type="button" value="Poner mensaje" onclick="changeMessage()" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Icono:
+          <input name="icono" id="icn" type="text" size="1" />
+          <input type="button" value="Poner icono" onclick="changeIcon()" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ColorPin:
+          <select id="colorPicker" onchange="changeColor()">
+                <option value="1">Rojo</option>
+                <option value="2">Azul</option>
+                <option value="3">Verde</option>
+                <option value="4">Amarillo</option>
+                <option value="5">Blanco</option>
+          </select>
+
+          <br><br>
+          <input type="button" value="Obtener Clima" onclick="obtenerClima()" /> &nbsp;temperatura:
+          <input name="clima" id="tempDisplay" type="text" size="10" /> &nbsp;Humedad:
+          <input name="clima" id="humDisplay" type="text" size="10" /> &nbsp;Velocidad viento:
+          <input name="clima" id="vientoDisplay" type="text" size="10" />
+        </td>
+      </tr>
+    </table>
+
+
+    <div id="map_canvas" style="width:100%; min-height: 500px; z-index: 4000; float: left; border: 1px solid black;">
+    </div>
+  </div>
+
+
+  <!-- TIENDA-------------------------------------------------------->
+  <div class="container" id="Tienda"  style="display: none">
+    <h1><b>Shopping Car</b></h1><br>
+
+    <label>Productos</label>
+    <select id="id_productos" onchange="getDataProductos()"></select>
+
+    <label for="Precio">Precio</label>
+    <input placeholder="0.00" id="Precio" type="text">
+
+
+    <label for="Precio">Cantidad</label>
+    <input type="text" size="1" id="Cantidad" value="1" onkeydown="if (event.keyCode == 13) document.getElementById('addShoppingCar').click()" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+    <input class="button2" type="button" id="addShoppingCar" onclick="addCar()" value=" Agregar al carrito " /><br><br>
+
+
+    <table class="table table-striped table-bordered" id="tableProducts" border="1">
+      <thead>
+        <tr>
+          <th width="35" id="Cant">Cantidad</th>
+          <th width="35" id="Nombre">Nombre</th>
+          <th width="35" id="Prec">Precio</th>
+          <th width="35" id="Imp">Importe</th>
+          <th width="40" id="Imagen">Imagen</th>
+          <th width="40" id="Descuento">Descuento</th>
+          <th width="40" id="borrar">Borrar</th>
+        </tr>
+      </thead>
+    </table>
+
+
+    <table class="table table-striped table-bordered" border="0">
+      <tr>
+
+        <td>Total Importe: $</td>
+        <td>
+          <div id="totalImporte"> </div>
+
+        </td>
+        <td>Total Unidades: $</td>
+        <td>
+          <div id="totalUnidades"> </div>
+
+        </td>
+      </tr>
+
+    </table>
+
+
+<!--PAYPAL BUTTON------>
+    <br>
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+
+      <input type="hidden" name="business" value="herschelgomez@xyzzyu.com">
+
+      <input type="hidden" name="cmd" value="_xclick">
+
+      <input type="hidden" name="item_name" value="Hot Sauce-12oz. Bottle">
+      <input type="hidden" name="amount" value="5.95">
+      <input type="hidden" name="currency_code" value="USD">
+
+      <input type="image" name="submit" border="0" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" alt="Buy Now">
+      <img alt="" border="0" width="1" height="1" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif">
+
+    </form>
+  </div>
+
+
+<!-- YOUTUBE-------------------------------------------------------->
+  <div class="container" id="Youtube" style="display: none">
+    <h1><b>Youtube Company Channel</b></h1><br>
+
+  </div>
+
+</body>
+
+</html>
