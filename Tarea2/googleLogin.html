@@ -1,9 +1,13 @@
 <html lang="en">
   <head>
     <meta name="google-signin-scope" content="profile email">
-    <meta name="google-signin-client_id" content="984407356969-4l014ijh0em2nmfm6ra7hcuu0ggal25i.apps.googleusercontent.com
-.apps.googleusercontent.com">
+    <meta name="google-signin-client_id" content="9984407356969-gioj7ketcpvb6ub3upcul43ni575ldqf.apps.googleusercontent.com">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+    gapi.load('auth2', function){
+      gapi.auth2.init();
+    }
+    
   </head>
   <body>
     <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
