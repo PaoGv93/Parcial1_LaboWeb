@@ -1,3 +1,3 @@
 # labo-web-trabajos
 
-Trabajos de segundo parcial de Laboratorio Web.
+Trabajos de segundo parcial de Web1
